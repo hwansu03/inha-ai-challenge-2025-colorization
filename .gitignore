@@ -1,0 +1,4 @@
+data/
+*.safetensors
+*.bin
+sdxl_light_caption_output/
