@@ -1,140 +1,22 @@
-# Text-Guided-Image-Colorization
+# inha-ai-challenge-2025-colorization
 
-This project utilizes the power of **Stable Diffusion (SDXL/SDXL-Light)** and the **BLIP (Bootstrapping Language-Image Pre-training)** captioning model to provide an interactive image colorization experience. Users can influence the generated colors of objects within images, making the colorization process more personalized and creative.
+## 1. 프로젝트 개요
+본 프로젝트는 인하 인공지능 챌린지 2025 출품작으로, 확산 모델(Diffusion Model) 기반 이미지 색채화 파이프라인의 성능 개선 연구입니다.
+원본 레포지토리([nick8592/text-guided-image-colorization](https://github.com/nick8592/text-guided-image-colorization))를 베이스로 하며, 수동으로 입력하거나 하드코딩되던 텍스트 프롬프트 방식을 LLM 기반의 자동 정제 및 분류 시스템으로 개선하는 것을 핵심 목표로 합니다.
 
-![framework.jpg](images/framework.jpg)
+## 2. 원본 아키텍처 이해
+![github_picture](https://github.com/user-attachments/assets/0da4d46c-7b9f-46c5-8ecc-daa384447242)
 
-## Table of Contents
- - [Features](#features)
- - [Installation](#installation)
- - [Quick Start](#quick-start)
- - [Dataset Usage](#dataset-usage)
- - [Training](#training)
- - [Evaluation](#evaluation)
- - [Results](#results)
- - [License](#license)
+기존 시스템은 Stable Diffusion(SDXL/SDXL-Light)과 BLIP(Bootstrapping Language-Image Pre-training) 캡셔닝 모델을 활용하여, 텍스트 지시어와 원본 흑백 이미지의 형태 정보를 결합해 컬러 이미지를 생성합니다.
 
-## News  
-- **(2024/11/23)** The project is now available on [Hugging Face Spaces](https://huggingface.co/spaces/fffiloni/text-guided-image-colorization) 🎉 Big thanks to @fffiloni!
+## 3. 개선 목표 및 파인튜닝 계획
 
-  
-## Features
+**문제 정의**
 
-- **Interactive Colorization**: Users can specify desired colors for different objects in the image.
-- **ControlNet Approach**: Enhanced colorization capabilities through retraining with ControlNet, allowing SDXL to better adapt to the image colorization task.
-- **High-Quality Outputs**: Leverage the latest advancements in diffusion models to generate vibrant and realistic colorizations.
+챌린지에서 제공된 학습 데이터셋의 텍스트는 인위적으로 생성된 흔적이 뚜렷하며, 실제 이미지의 시각적 맥락과 무관한 노이즈가 다수 포함되어 있습니다. 원본 코드에서는 이러한 텍스트를 단순 하드코딩 방식으로 처리하고 있어 대규모 데이터에 대한 유연성과 생성 품질이 떨어집니다.
 
-## Installation
+**파인튜닝 계획**
 
-To set up the project locally, follow these steps:
-
-1. **Clone the Repository**:
-
-   ```bash
-   git clone https://github.com/nick8592/text-guided-image-colorization.git
-   cd text-guided-image-colorization
-   ```
-
-2. **Install Dependencies**:
-   Make sure you have Python 3.7 or higher installed. Then, install the required packages:
-
-   ```bash
-   pip install -r requirements.txt
-   ```
-   Install `torch` and `torchvision` matching your CUDA version:
-   ```bash
-   pip install torch torchvision --index-url https://download.pytorch.org/whl/cuXXX
-   ```
-   Replace `XXX` with your CUDA version (e.g., `118` for CUDA 11.8). For more info, see [PyTorch Get Started](https://pytorch.org/get-started/locally/).   
-
-
-3. **Download Pre-trained Models**:
-   | Models | Hugging Face |
-   |:---:|:---:|
-   |SDXL-Lightning Caption|[link](https://huggingface.co/nickpai/sdxl_light_caption_output)|
-   |SDXL-Lightning Custom Caption (Recommand)|[link](https://huggingface.co/nickpai/sdxl_light_custom_caption_output)|
-
-
-   ```bash
-   text-guided-image-colorization/sdxl_light_caption_output
-   └── checkpoint-30000
-       ├── controlnet
-       │   ├── diffusion_pytorch_model.safetensors
-       │   └── config.json
-       ├── optimizer.bin
-       ├── random_states_0.pkl
-       ├── scaler.pt
-       └── scheduler.bin
-   ```
-
-## Quick Start
-
-1. Run the `gradio_ui.py` script:
-
-```bash
-python gradio_ui.py
-```
-
-2. Open the provided URL in your web browser to access the Gradio-based user interface.
-
-3. Upload an image and use the interface to control the colors of specific objects in the image. But still the model can generate images without a specific prompt.
-
-4. The model will generate a colorized version of the image based on your input (or automatic). See the [demo video](https://x.com/weichenpai/status/1829513077588631987).
-![Gradio UI](images/gradio_ui.png)
-
-
-## Dataset Usage
-
-You can find more details about the dataset usage in the [Dataset-for-Image-Colorization](https://github.com/nick8592/Dataset-for-Image-Colorization).
-
-## Training
-
-For training, you can use one of the following scripts:
-
-- `train_controlnet.sh`: Trains a model using [Stable Diffusion v2](https://huggingface.co/stabilityai/stable-diffusion-2-1)
-- `train_controlnet_sdxl.sh`: Trains a model using [SDXL](https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0)
-- `train_controlnet_sdxl_light.sh`: Trains a model using [SDXL-Lightning](https://huggingface.co/ByteDance/SDXL-Lightning)
-
-Although the training code for SDXL is provided, due to a lack of GPU resources, I wasn't able to train the model by myself. Therefore, there might be some errors when you try to train the model.
-
-## Evaluation
-
-For evaluation, you can use one of the following scripts:
-
-- `eval_controlnet.sh`: Evaluates the model using [Stable Diffusion v2](https://huggingface.co/stabilityai/stable-diffusion-2-1) for a folder of images.
-- `eval_controlnet_sdxl_light.sh`: Evaluates the model using [SDXL-Lightning](https://huggingface.co/ByteDance/SDXL-Lightning) for a folder of images.
-- `eval_controlnet_sdxl_light_single.sh`: Evaluates the model using [SDXL-Lightning](https://huggingface.co/ByteDance/SDXL-Lightning) for a single image.
-
-## Results
-### Prompt-Guided
-| Caption | Condition 1 | Condition 2 | Condition 3 |
-|:---:|:---:|:---:|:---:|
-| ![000000022935_gray.jpg](images/000000022935_gray.jpg) | ![000000022935_green_shirt_on_right_girl.jpeg](images/000000022935_green_shirt_on_right_girl.jpeg) | ![000000022935_purple_shirt_on_right_girl.jpeg](images/000000022935_purple_shirt_on_right_girl.jpeg) |![000000022935_red_shirt_on_right_girl.jpeg](images/000000022935_red_shirt_on_right_girl.jpeg) |
-| a photography of a woman in a soccer uniform kicking a soccer ball | + "green shirt"| + "purple shirt" | + "red shirt" |
-| ![000000041633_gray.jpg](images/000000041633_gray.jpg) | ![000000041633_bright_red_car.jpeg](images/000000041633_bright_red_car.jpeg) | ![000000041633_dark_blue_car.jpeg](images/000000041633_dark_blue_car.jpeg) |![000000041633_black_car.jpeg](images/000000041633_black_car.jpeg) |
-| a photography of a photo of a truck | + "bright red car"| + "dark blue car" | + "black car" |
-| ![000000286708_gray.jpg](images/000000286708_gray.jpg) | ![000000286708_orange_hat.jpeg](images/000000286708_orange_hat.jpeg) | ![000000286708_pink_hat.jpeg](images/000000286708_pink_hat.jpeg) |![000000286708_yellow_hat.jpeg](images/000000286708_yellow_hat.jpeg) |
-| a photography of a cat wearing a hat on his head | + "orange hat"| + "pink hat" | + "yellow hat" |
-
-### Prompt-Free
-Ground truth images are provided solely for reference purpose in the image colorization task.
-| Grayscale Image | Colorized Result | Ground Truth |
-|:---:|:---:|:---:|
-| ![000000025560_gray.jpg](images/000000025560_gray.jpg) | ![000000025560_color.jpg](images/000000025560_color.jpg) | ![000000025560_gt.jpg](images/000000025560_gt.jpg) |
-| ![000000065736_gray.jpg](images/000000065736_gray.jpg) | ![000000065736_color.jpg](images/000000065736_color.jpg) | ![000000065736_gt.jpg](images/000000065736_gt.jpg) |
-| ![000000091779_gray.jpg](images/000000091779_gray.jpg) | ![000000091779_color.jpg](images/000000091779_color.jpg) | ![000000091779_gt.jpg](images/000000091779_gt.jpg) |
-| ![000000092177_gray.jpg](images/000000092177_gray.jpg) | ![000000092177_color.jpg](images/000000092177_color.jpg) | ![000000092177_gt.jpg](images/000000092177_gt.jpg) |
-| ![000000166426_gray.jpg](images/000000166426_gray.jpg) | ![000000166426_color.jpg](images/000000166426_color.jpg) | ![000000025560_gt.jpg](images/000000166426_gt.jpg) |
-
-## Read More  
-
-Here are some related articles you might find interesting:  
-
-- [Image Colorization: Bringing Black and White to Life](https://medium.com/generative-ai/image-colorization-bringing-black-and-white-to-life-b14d3e0db763)  
-- [Understanding RGB, YCbCr, and Lab Color Spaces](https://medium.com/@weichenpai/understanding-rgb-ycbcr-and-lab-color-spaces-f9c4a5fe485a)  
-- [Comparison Between CLIP and BLIP Models](https://medium.com/generative-ai/comparison-between-clip-and-blip-models-42f8a6ff4b1e)  
-- [A Step-by-Step Guide to Interactive Machine Learning with Gradio](https://medium.com/generative-ai/a-step-by-step-guide-to-interactive-machine-learning-with-gradio-3fde7541da52)  
-
-## License
-
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for more details.
+기존의 하드코딩 방식을 대체하기 위해 파이프라인 앞단에 LLM을 도입합니다.
+1. **노이즈 필터링:** 주어진 텍스트 데이터의 문맥을 LLM이 분석하여, 노이즈를 제거하고 의미가 명확한 프롬프트로 정제합니다.
+2. **정제된 텍스트를 이용한 성능 향상:** 이렇게 필터링 및 정제된 고품질 텍스트-이미지 쌍(Pair) 데이터를 구축한 뒤, 이를 바탕으로 본 모델의 파인튜닝을 진행하여 최종적인 색채화 완성도를 향상시킵니다.
